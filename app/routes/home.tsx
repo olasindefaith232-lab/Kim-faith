@@ -1,27 +1,69 @@
 import type { Route } from "./+types/home";
-import { ArrowUpRight, Check, Play } from "../components/icons";
-import { ButtonLink, Footer, Nav, PageIntro, Stat, Testimonial } from "../components/site";
+import { useEffect, useState } from "react";
+import { ArrowUpRight, Check, ChevronLeft, ChevronRight, Pause, Play } from "../components/icons";
+import { Link } from "react-router";
+import { ButtonLink, Footer, Nav, PageIntro } from "../components/site";
+import { products } from "../data/products";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Bilatec | Power, reimagined" },
-    { name: "description", content: "Bilatec designs solar energy systems for a brighter, more independent future." },
+    { title: "Bilatec | Electrical, Industrial & Solar" },
+    { name: "description", content: "Explore Bilatec electrical, industrial and solar products, services, projects and technical learning." },
   ];
 }
 
 export default function Home() {
+  const [activeSlide, setActiveSlide] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const heroSlides = [
+    {
+      src: "https://images.unsplash.com/photo-1621905251918-48416bd8575a?auto=format&fit=crop&w=2000&q=90",
+      alt: "Electrical technician working with industrial equipment",
+      label: "Electrical",
+    },
+    {
+      src: "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?auto=format&fit=crop&w=2000&q=90",
+      alt: "Solar panels generating power across an open landscape",
+      label: "Solar",
+    },
+    {
+      src: "https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?auto=format&fit=crop&w=2000&q=90",
+      alt: "Metal fabrication work taking place in a workshop",
+      label: "Industrial",
+    },
+  ];
+
+  useEffect(() => {
+    if (paused || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const interval = window.setInterval(() => {
+      setActiveSlide((current) => (current + 1) % heroSlides.length);
+    }, 6500);
+    return () => window.clearInterval(interval);
+  }, [paused, heroSlides.length]);
+
+  function changeSlide(direction: number) {
+    setActiveSlide((current) => (current + direction + heroSlides.length) % heroSlides.length);
+  }
+
   return (
     <div className="site-shell">
       <Nav />
       <main>
         <section className="hero-section">
-          <div className="hero-copy reveal-up"><p className="eyebrow"><span className="eyebrow-dot" /> Energy, made personal</p><h1>Make your own <em>sunshine.</em></h1><p className="hero-lede">Intelligent solar systems that give your home more freedom, more resilience, and a lighter footprint.</p><div className="hero-actions"><ButtonLink to="/contact">Start your solar story <ArrowUpRight /></ButtonLink><a className="text-link" href="#how-it-works"><span className="play-icon"><Play /></span> See how it works</a></div><div className="hero-proof"><strong>4.9 / 5</strong><span className="stars">★★★★★</span><span>from 680+ homeowners</span></div></div>
-          <div className="hero-visual reveal-in"><img src="https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=1600&q=85" alt="Solar panels catching the afternoon sun" /><div className="hero-sticker"><span className="sticker-sun">✦</span><strong>Clean power<br />for real life.</strong></div><div className="hero-caption">The Hawthorne home <span>↗</span></div></div>
+          <div className="hero-visual" role="region" aria-label="Bilatec electrical, solar and industrial work" aria-roledescription="carousel">
+            {heroSlides.map((slide, index) => <img className={`hero-slide ${index === activeSlide ? "is-active" : ""}`} key={slide.src} src={slide.src} alt={index === activeSlide ? slide.alt : ""} aria-hidden={index !== activeSlide} />)}
+          </div>
+          <div className="hero-copy reveal-up"><p className="eyebrow"><span className="eyebrow-dot" /> Electrical / Industrial / Solar</p><h1>Powering the work<br /><em>that moves us.</em></h1><p className="hero-lede">Bilatec connects homes, businesses and communities with electrical, industrial and solar products, services and practical learning.</p><div className="hero-actions"><ButtonLink to="/products/industrial-electrical-systems">Explore products <ArrowUpRight /></ButtonLink><Link className="text-link" to="/contact">Discuss your needs <ArrowUpRight /></Link></div></div>
+          <div className="hero-carousel-controls" aria-label="Hero image controls">
+            <button type="button" onClick={() => changeSlide(-1)} aria-label="Previous hero image"><ChevronLeft /></button>
+            <span aria-live="polite"><strong>{String(activeSlide + 1).padStart(2, "0")}</strong> / {String(heroSlides.length).padStart(2, "0")} <small>{heroSlides[activeSlide].label}</small></span>
+            <button type="button" onClick={() => changeSlide(1)} aria-label="Next hero image"><ChevronRight /></button>
+            <button type="button" onClick={() => setPaused(!paused)} aria-label={paused ? "Play hero images" : "Pause hero images"}>{paused ? <Play /> : <Pause />}</button>
+          </div>
         </section>
-        <section className="trust-row"><span>tRUSTED BY PEOPLE WHO THINK AHEAD</span><div className="trust-logos"><b>north<span>star</span></b><b>HOMES<span className="logo-light">+</span></b><b>Good<span className="logo-leaf">leaf</span></b><b>LOOM.</b></div></section>
-        <section className="section light-section" id="how-it-works"><PageIntro label="The Bilatec difference" title={<>Good energy, <em>beautifully</em> simple.</>} copy="You do not need to be an energy expert. We make the transition to solar clear, thoughtful, and tailored to the way you actually live." /><div className="feature-grid"><article className="feature-card feature-card-image"><img src="https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=900&q=80" alt="Green forest under soft sunlight" /><div><span>01</span><h3>Know your power</h3><p>See exactly what your home creates, stores, and uses in real time.</p></div></article><article className="feature-card feature-card-yellow"><span>02</span><h3>Made for your roof.</h3><p>Every system is designed around your home, your rhythm, and your long-term goals.</p><a className="round-arrow" href="/solutions"><ArrowUpRight /></a></article><article className="feature-card feature-card-dark"><span>03</span><h3>Feel the difference.</h3><p>Lower bills are just the beginning. Keep the lights on when the grid goes quiet.</p><div className="mini-wave">〰〰〰</div></article></div></section>
-        <section className="split-section"><div className="split-image"><img src="https://images.unsplash.com/photo-1548337138-e87d889cc369?auto=format&fit=crop&w=1100&q=80" alt="Solar panels on a modern house" /><span className="image-tag">Designed around you</span></div><div className="split-copy"><p className="eyebrow">The clear path forward</p><h2>Sunlight in.<br /><em>Worry out.</em></h2><p>From your first estimate to your first full-power morning, our team handles the details with care. No pressure. No guesswork. Just a smarter way to power what matters.</p><ul className="check-list"><li><Check /> A free, honest home assessment</li><li><Check /> Premium hardware, installed beautifully</li><li><Check /> A real human when you need one</li></ul><ButtonLink to="/about" variant="dark">Meet the people behind Bilatec <ArrowUpRight /></ButtonLink></div></section>
-        <section className="numbers-section"><div className="numbers-heading"><p className="eyebrow">Our impact, together</p><h2>A brighter grid<br /><em>starts at home.</em></h2></div><div className="stats-grid"><Stat number="12.8M" label="kWh generated by Bilatec homes" /><Stat number="8.4K" label="metric tons of CO₂ avoided" /><Stat number="680+" label="homes making their own power" /></div></section><Testimonial />
+        <section className="section light-section" id="how-it-works"><PageIntro label="What Bilatec does" title={<>Practical systems.<br /><em>Useful expertise.</em></>} copy="From product sales and supply to technical services and learning, Bilatec works across electrical, industrial and solar needs." /><div className="feature-grid home-product-grid">{products.slice(0, 3).map((product) => <Link className="feature-card feature-card-image" to={`/products/${product.slug}`} key={product.slug}><img src={product.image} alt="" /><div><span>{product.category}</span><h3>{product.title}</h3><p>{product.summary}</p></div></Link>)}</div></section>
+        <section className="split-section"><div className="split-image"><img src="https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=1100&q=85" alt="Solar panels arranged across a rooftop" /><span className="image-tag">Electrical and solar solutions</span></div><div className="split-copy"><p className="eyebrow">For homes and businesses</p><h2>Good systems<br /><em>start with fit.</em></h2><p>Every project starts by understanding the work to be done, the people who rely on it, and the products and support that suit the application.</p><ul className="check-list"><li><Check /> Electrical and industrial products</li><li><Check /> Solar equipment and system support</li><li><Check /> Technical learning and skills development</li></ul><ButtonLink to="/solutions" variant="dark">Explore solutions <ArrowUpRight /></ButtonLink></div></section>
+        <section className="band-cta"><p className="eyebrow">Work with Bilatec</p><h2>Have a need to solve<br /><em>or a skill to build?</em></h2><ButtonLink to="/contact">Tell us about it <ArrowUpRight /></ButtonLink></section>
       </main><Footer />
     </div>
   );
